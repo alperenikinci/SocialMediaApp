@@ -7,6 +7,12 @@ spring:
     base-url: http://localhost:9411
     service:
       name: auth-service
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: java4
+    password: root
+
   datasource:
     url: jdbc:postgresql://localhost:5432/SocialMediaDB
 #    url: jdbc:postgresql://java4-postgresql:5432/SocialMediaDB
@@ -26,5 +32,10 @@ myapplication:
 
 jwt:
   secretKey: "java4123"
-  issuer: "alperen"
+  issuer: "mustafa"
   audience: "bilgeadam"
+rabbitmq:
+  exchange-auth: auth-exchange
+  bindingKeyRegister: register-key
+  queueRegister: register-queue
+  queueUpdate: update-queue

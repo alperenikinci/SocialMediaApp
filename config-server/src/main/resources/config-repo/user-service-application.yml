@@ -7,6 +7,11 @@ spring:
     base-url: http://localhost:9411
     service:
       name: user-service
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: java4
+    password: root
   data:
     mongodb:
       host: localhost
@@ -23,5 +28,15 @@ myapplication:
     auth: http://localhost:8090/api/v1/auth
     post: http://localhost:8092/api/v1/post
     elastic: http://localhost:8099/api/v1/elastic
+
+jwt:
+  secretKey: "java4123"
+  issuer: "mustafa"
+  audience: "bilgeadam"
+rabbitmq:
+  queueRegister: register-queue
+  exchange-user: user-exchange
+  bindingKeyUpdate: update-key
+  queueUpdate: update-queue
 
 

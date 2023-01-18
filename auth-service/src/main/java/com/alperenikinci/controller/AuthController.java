@@ -41,6 +41,11 @@ public class AuthController {
 
 
 
+    @GetMapping("/gettoken")
+    public ResponseEntity<String> getToken(Long id){
+        return  ResponseEntity.ok(jwtTokenManager.createToken(id));
+    }
+
     @GetMapping("/getid")
     public ResponseEntity<Long> getId(String token){
         Optional<Long> id=jwtTokenManager.getUserId(token);
@@ -48,12 +53,20 @@ public class AuthController {
             return    ResponseEntity.ok(id.get());
         }else{
             throw new AuthManagerException(ErrorType.INVALID_TOKEN);
-        }    }
+        }
+
+    }
 
     @PostMapping(REGISTER)
     @Operation(summary = "Kullanici kayit eden metot")
     public ResponseEntity<RegisterResponseDto> register(@RequestBody @Valid RegisterRequestDto dto){
         return  ResponseEntity.ok( authService.register(dto));
+    }
+
+    @PostMapping(REGISTER+"withrabbitmq")
+    @Operation(summary = "Kullanici kayit eden metot")
+    public ResponseEntity<RegisterResponseDto> registerWithRabbitMq(@RequestBody @Valid RegisterRequestDto dto){
+        return  ResponseEntity.ok( authService.registerWithRabbitMQ(dto));
     }
 
 
@@ -63,11 +76,9 @@ public class AuthController {
     }
 
     @PostMapping(LOGIN)
-    public ResponseEntity<LoginResponseDto> login(@RequestBody @Valid LoginRequestDto dto){
-
-        return  ResponseEntity.ok(authService.login(dto));
-
-    }
+        public ResponseEntity<LoginResponseDto> login(@RequestBody @Valid LoginRequestDto dto){
+            return  ResponseEntity.ok(authService.login(dto));
+        }
 
     @GetMapping(GETALLACTIVATESTATUS)
     public ResponseEntity<List<ActivateResponseDto>> getActiveStatus(){
@@ -155,10 +166,7 @@ public class AuthController {
 
     }
 
-    @GetMapping("/gettoken")
-    public ResponseEntity<String> getToken(Long id){
-    return ResponseEntity.ok(jwtTokenManager.createToken(id));
-    }
+
 
 
 

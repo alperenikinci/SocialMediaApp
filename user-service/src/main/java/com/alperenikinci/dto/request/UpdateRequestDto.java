@@ -8,14 +8,16 @@ import lombok.NoArgsConstructor;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
+import java.io.Serializable;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
 @Builder
-public class UpdateRequestDto {
+public class UpdateRequestDto implements Serializable {
 
     private String id;
+    private    String token;
     @NotBlank
     @Size(min = 3 ,max=20 ,message = "Kullanici adi en az  3 karakter en fazla 20 karakter olabilir")
     private String username;

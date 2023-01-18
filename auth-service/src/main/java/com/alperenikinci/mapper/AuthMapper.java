@@ -6,6 +6,8 @@ import com.alperenikinci.dto.response.ActivateResponseDto;
 import com.alperenikinci.dto.response.LoginResponseDto;
 import com.alperenikinci.dto.response.RegisterResponseDto;
 import com.alperenikinci.dto.response.RoleResponseDto;
+import com.alperenikinci.rabbitmq.model.NewCreateUserModel;
+import com.alperenikinci.rabbitmq.model.UpdateUserProfileModel;
 import com.alperenikinci.repository.entity.Auth;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -36,4 +38,8 @@ public interface AuthMapper {
     RoleResponseDto toRoleResponseDto(final Auth auth);
 
     LoginResponseDto toLoginResponseDto(final Auth auth);
+    @Mapping(source = "id",target = "authId")
+    NewCreateUserModel toNewCreateUserModel(final Auth auth);
+
+    Auth toUserAuth(final UpdateUserProfileModel model);
 }

@@ -14,6 +14,7 @@ import com.alperenikinci.exception.AuthManagerException;
 import com.alperenikinci.exception.ErrorType;
 import com.alperenikinci.manager.IUserManager;
 import com.alperenikinci.mapper.AuthMapper;
+import com.alperenikinci.rabbitmq.producer.RegisterUserProducer;
 import com.alperenikinci.repository.IAuthRepository;
 import com.alperenikinci.repository.entity.Auth;
 import com.alperenikinci.repository.enums.Roles;
@@ -24,6 +25,7 @@ import com.alperenikinci.utility.ServiceManager;
 import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 
@@ -36,6 +38,17 @@ public class AuthService  extends ServiceManager<Auth,Long > {
     private final IUserManager userManager;
     private final CacheManager cacheManager;
     private final JwtTokenManager jwtTokenManager;
+    private final RegisterUserProducer registerUserProducer;
+
+    public AuthService(IAuthRepository authRepository, IUserManager userManager, CacheManager cacheManager, JwtTokenManager jwtTokenManager, RegisterUserProducer registerUserProducer) {
+        super(authRepository);
+        this.authRepository=authRepository;
+        this.userManager = userManager;
+        this.cacheManager = cacheManager;
+        this.jwtTokenManager = jwtTokenManager;
+        this.registerUserProducer = registerUserProducer;
+    }
+
     public Boolean updateByEmailOrUsername (UpdateByEmailOrUsernameRequestDto dto) {
         Optional <Auth> auth = authRepository.findById(dto.getId());
         if(auth.isEmpty()){
@@ -59,16 +72,11 @@ public class AuthService  extends ServiceManager<Auth,Long > {
         return true;
     }
 
-    public AuthService(IAuthRepository authRepository, IUserManager userManager, CacheManager cacheManager, JwtTokenManager jwtTokenManager) {
-        super(authRepository);
-        this.authRepository=authRepository;
-        this.userManager = userManager;
-        this.cacheManager = cacheManager;
-        this.jwtTokenManager = jwtTokenManager;
-    }
 
 
 
+
+    @Transactional
     public RegisterResponseDto register(RegisterRequestDto dto){
 
     /*    if (authRepository.findOptionalByUsername(dto.getUsername()).isPresent()){
@@ -85,29 +93,43 @@ public class AuthService  extends ServiceManager<Auth,Long > {
             //  throw  new DataIntegrityViolationException("Kullanýcý adý vardýr");
             throw  new AuthManagerException(ErrorType.USERNAME_DUPLICATE);
         }
+    }
+    public RegisterResponseDto registerWithRabbitMQ(RegisterRequestDto dto) {
 
-
+        if (authRepository.findOptionalByUsername(dto.getUsername()).isPresent()) {
+            throw new AuthManagerException(ErrorType.USERNAME_DUPLICATE);
+        }
+        Auth auth = AuthMapper.INSTANCE.toAuth(dto);
+        try {
+            auth.setActivationCode(CodeGenerator.generateCode());
+            save(auth);
+            registerUserProducer.sendNewUser(AuthMapper.INSTANCE.toNewCreateUserModel(auth));
+            return AuthMapper.INSTANCE.toRegisterResponseDto(auth);
+        } catch (Exception e) {
+            //    delete(auth);
+            System.out.println(e.toString());
+            //  throw  new DataIntegrityViolationException("Kullan?c? ad? vard?r");
+            throw new AuthManagerException(ErrorType.USER_NOT_CREATED);
+        }
     }
 
-    public ActivateResponseDto activateStatus(ActivateRequestDto dto) {
-        Optional<Auth> auth=findById(dto.getId()) ;
-        ActivateResponseDto responseDto=null;
-        if (auth.isEmpty()){
-            throw new AuthManagerException(ErrorType.USER_NOT_FOUND);
+        public ActivateResponseDto activateStatus(ActivateRequestDto dto) {
+            Optional<Auth> auth=findById(dto.getId()) ;
+            ActivateResponseDto responseDto=null;
+            if (auth.isEmpty()){
+                throw new AuthManagerException(ErrorType.USER_NOT_FOUND);
+            }
+            if (auth.get().getActivationCode().equals(dto.getActivationCode())){
+                auth.get().setStatus(Status.ACTIVE);
+                save(auth.get());
+                // userprofile controller a bir id gonderebilirim
+                userManager.activateStatus(dto.getId());
+                cacheManager.getCache("findallactiveprofile").clear();
+                responseDto=AuthMapper.INSTANCE.toActivateResponseDto(auth.get());
+            }
+            return responseDto;
         }
-        if (auth.get().getActivationCode().equals(dto.getActivationCode())){
-            auth.get().setStatus(Status.ACTIVE);
 
-            save(auth.get());
-            // userprofile controller a bir id gonderebilirim
-            userManager.activateStatus(dto.getId());
-            cacheManager.getCache("findallactiveprofile").clear();
-
-            responseDto=AuthMapper.INSTANCE.toActivateResponseDto(auth.get());
-        }
-        return responseDto;
-    }
-//asdf
     public LoginResponseDto login(LoginRequestDto dto) {
         Optional<Auth> auth=authRepository.findOptionalByUsernameAndPassword(dto.getUsername(), dto.getPassword());
         if (auth.isEmpty()){

@@ -3,6 +3,7 @@ package com.alperenikinci.mapper;
 import com.alperenikinci.dto.request.NewCreateUserDto;
 import com.alperenikinci.dto.request.UpdateRequestDto;
 import com.alperenikinci.dto.response.UpdateResponseDto;
+import com.alperenikinci.rabbitmq.model.NewCreateUserModel;
 import com.alperenikinci.repository.entity.UserProfile;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
@@ -22,5 +23,7 @@ UserProfile toUserProfile(final UpdateRequestDto dto);
 UpdateResponseDto toUpdateResponseDto(final UpdateRequestDto dto);
 
 UpdateResponseDto toUpdateResponseDto(final UserProfile userProfile);
+
+UserProfile toUserProfile( final NewCreateUserModel model);
 
 }
