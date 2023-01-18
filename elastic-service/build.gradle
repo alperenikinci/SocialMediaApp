@@ -1,0 +1,13 @@
+buildscript {
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:$versions.springBoot")
+    }
+}
+
+dependencies {
+    implementation libs.springDataElasticSearch
+    implementation libs.springCloudConfigClient
+    implementation libs.GraphqlJavaTools
+    implementation libs.GraphqlSpringBootStarter
+    implementation libs.GraphiqlSpringBootStarter
+}

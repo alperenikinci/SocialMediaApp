@@ -1,0 +1,20 @@
+server:
+  port: 8086
+#jdbc:postgresql://localhost:5432/SocialMediaDB
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: ${db_auth_postgres_url}
+    username: ${db_postgres_username}
+    password: ${db_postgres_password}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+myapplication:
+  feign:
+    user:
+      profile: http://localhost:8091/api/v1/user
+      follow : http://localhost:8091/api/v1/follow
+    post: http://localhost:8092/api/v1/post

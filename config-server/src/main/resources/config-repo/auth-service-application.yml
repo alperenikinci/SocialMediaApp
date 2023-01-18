@@ -1,0 +1,30 @@
+server:
+  port: 8090
+
+spring:
+  zipkin:
+    enabled: true
+    base-url: http://localhost:9411
+    service:
+      name: auth-service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/SocialMediaDB
+#    url: jdbc:postgresql://java4-postgresql:5432/SocialMediaDB
+    username: postgres
+    password: root
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+myapplication:
+  feign:
+    user:
+      profile :   http://localhost:8091/api/v1/user
+      follow  :   http://localhost:8091/api/v1/follow
+    post      :   http://localhost:8092/api/v1/post
+
+jwt:
+  secretKey: "java4123"
+  issuer: "alperen"
+  audience: "bilgeadam"

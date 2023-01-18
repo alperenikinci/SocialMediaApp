@@ -1,0 +1,30 @@
+type UserProfile{
+    id:ID!
+    authId:Int!
+    username:String!
+    name:String
+    email:String
+    phone:String
+    address:String
+    createdDate:Int
+    updatedDate:Int
+    about:String
+    status:String
+}
+input UserProfileInput{
+    username:String!
+    email:String!
+    password:String!
+}
+type  Query{
+    findAll: [UserProfile]
+    findAllContainingEmail(value:String!):[UserProfile]
+    findAllByStatus(status:String!):[UserProfile]
+    findAllByStatusOrAddress(status:String,address:String):[UserProfile]
+    findByUsername(username:String!):UserProfile
+}
+
+type Mutation{
+
+    createUserProfile(profile:UserProfileInput):Boolean!
+}
