@@ -12,5 +12,5 @@ spring:
           default-label: main
           skip-ssl-validation: true
           username: "alperenikinci"
-          password: "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"
+          password: ${github_socialmedia_token}
 
