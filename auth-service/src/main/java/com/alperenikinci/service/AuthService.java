@@ -14,6 +14,8 @@ import com.alperenikinci.exception.AuthManagerException;
 import com.alperenikinci.exception.ErrorType;
 import com.alperenikinci.manager.IUserManager;
 import com.alperenikinci.mapper.AuthMapper;
+import com.alperenikinci.rabbitmq.model.EmailSenderModel;
+import com.alperenikinci.rabbitmq.producer.EmailProducer;
 import com.alperenikinci.rabbitmq.producer.RegisterUserProducer;
 import com.alperenikinci.repository.IAuthRepository;
 import com.alperenikinci.repository.entity.Auth;
@@ -39,14 +41,16 @@ public class AuthService  extends ServiceManager<Auth,Long > {
     private final CacheManager cacheManager;
     private final JwtTokenManager jwtTokenManager;
     private final RegisterUserProducer registerUserProducer;
+    private final EmailProducer emailProducer;
 
-    public AuthService(IAuthRepository authRepository, IUserManager userManager, CacheManager cacheManager, JwtTokenManager jwtTokenManager, RegisterUserProducer registerUserProducer) {
+    public AuthService(IAuthRepository authRepository, IUserManager userManager, CacheManager cacheManager, JwtTokenManager jwtTokenManager, RegisterUserProducer registerUserProducer, EmailProducer emailProducer) {
         super(authRepository);
         this.authRepository=authRepository;
         this.userManager = userManager;
         this.cacheManager = cacheManager;
         this.jwtTokenManager = jwtTokenManager;
         this.registerUserProducer = registerUserProducer;
+        this.emailProducer = emailProducer;
     }
 
     public Boolean updateByEmailOrUsername (UpdateByEmailOrUsernameRequestDto dto) {
@@ -71,10 +75,6 @@ public class AuthService  extends ServiceManager<Auth,Long > {
         userManager.deleteByAuthId(authId);
         return true;
     }
-
-
-
-
 
     @Transactional
     public RegisterResponseDto register(RegisterRequestDto dto){
@@ -101,9 +101,14 @@ public class AuthService  extends ServiceManager<Auth,Long > {
         }
         Auth auth = AuthMapper.INSTANCE.toAuth(dto);
         try {
-            auth.setActivationCode(CodeGenerator.generateCode());
+            String code = CodeGenerator.generateCode();
+            auth.setActivationCode(code);
             save(auth);
             registerUserProducer.sendNewUser(AuthMapper.INSTANCE.toNewCreateUserModel(auth));
+            emailProducer.sendActivationCode(EmailSenderModel.builder()
+                            .email(auth.getEmail())
+                            .activationCode(code)
+                    .build());
             return AuthMapper.INSTANCE.toRegisterResponseDto(auth);
         } catch (Exception e) {
             //    delete(auth);

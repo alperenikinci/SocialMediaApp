@@ -19,6 +19,7 @@ import com.alperenikinci.utility.JwtTokenManager;
 import com.alperenikinci.utility.ServiceManager;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -188,5 +189,17 @@ public class UserProfileService extends ServiceManager<UserProfile,String> {
         save(userProfile.get());
         return  IUserMapper.INSTANCE.toUpdateResponseDto(userProfile.get());
 
+    }
+
+    public Page<UserProfile> findAllPageable(int pageSize, int pageNumber, String direction, String sortParameter) {
+        Sort sort = Sort.by(Sort.Direction.fromString(direction),sortParameter);
+        Pageable pageable = PageRequest.of(pageNumber,pageSize,sort);
+        return userProfileRepository.findAll(pageable);
+    }
+
+    public Slice<UserProfile> findAllSlice(int pageSize, int pageNumber, String direction, String sortParameter) {
+        Sort sort = Sort.by(Sort.Direction.fromString(direction),sortParameter);
+        Pageable pageable = PageRequest.of(pageNumber,pageSize,sort);
+        return userProfileRepository.findAll(pageable);
     }
 }

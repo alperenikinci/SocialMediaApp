@@ -21,6 +21,7 @@ import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import static com.alperenikinci.constants.RestApi.*;
 
@@ -86,6 +87,7 @@ public class AuthController {
     }
 
     @GetMapping(GETALLBYSTATUS)
+    @PreAuthorize("hasAnyAuthority('ADMIN','USER')")
     public ResponseEntity<List<ActivateResponseDto>> findAllByStatus(Status status){
         return ResponseEntity.ok(authService.findAllByStatus(status));
     }

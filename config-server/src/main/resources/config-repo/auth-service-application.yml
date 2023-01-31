@@ -2,6 +2,10 @@ server:
   port: 8090
 
 spring:
+  security:
+    user:
+      name: alperen
+      password: 123
   zipkin:
     enabled: true
     base-url: http://localhost:9411
@@ -39,3 +43,5 @@ rabbitmq:
   bindingKeyRegister: register-key
   queueRegister: register-queue
   queueUpdate: update-queue
+  queueEmail: email-queue
+  bindingKeyEmail: email-key

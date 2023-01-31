@@ -9,6 +9,8 @@ import com.alperenikinci.service.UserProfileService;
 import lombok.RequiredArgsConstructor;
 import org.apache.catalina.User;
 import org.springframework.cache.CacheManager;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Slice;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -81,4 +83,15 @@ public class UserProfileController {
 
         return ResponseEntity.ok(userProfileService.findAllActiveProfile());
     }
+
+    @GetMapping("/findallbypageable")
+    public ResponseEntity<Page<UserProfile>> findAllPageable(int pageSize, int pageNumber, String direction, String sortParameter){
+        return ResponseEntity.ok(userProfileService.findAllPageable(pageSize,pageNumber,direction,sortParameter));
+    }
+
+    @GetMapping("/findallbyslice")
+    public ResponseEntity<Slice<UserProfile>> findAllSlice(int pageSize, int pageNumber, String direction, String sortParameter){
+        return ResponseEntity.ok(userProfileService.findAllSlice(pageSize,pageNumber,direction,sortParameter));
+    }
+
 }
